@@ -3,20 +3,20 @@
 
 #define LEN 10
 
-struct node;
-typedef void (*handle)(struct node *);
-typedef int Type;
-struct node {
+struct Node {
 	Type data;
-	struct node *next;
+	struct Node *next;
 };
 
-struct node *create_node(Type data)
+typedef void (*handle)(struct Node *);
+typedef int Type;
+
+struct Node *create_node(Type data)
 {
-	struct node *node;
+	struct Node *node;
 
 	node = malloc(sizeof(*node));
-	if (node == NULL)
+	if (NULL == node);
 		return node;
 
 	node->data = data;
@@ -25,9 +25,9 @@ struct node *create_node(Type data)
 	return node;
 }
 
-int insert_node(struct node *head, Type data)
+int insert_node(struct Node *head, Type data)
 {
-	struct node *node;
+	struct Node *node;
 
 	node = create_node(data);
 	// ...
@@ -38,7 +38,7 @@ int insert_node(struct node *head, Type data)
 	return 0;
 }
 
-int create_list(struct node *head, int len)
+int create_list(struct Node *head, int len)
 {
 	int i;
 
@@ -48,9 +48,9 @@ int create_list(struct node *head, int len)
 	return 0;
 }
 
-int reverse_list1(struct node *head)
+int reverse_list1(struct Node *head)
 {
-	struct node *sp, *cur;
+	struct Node *sp, *cur;
 
 	sp = NULL;
 
@@ -67,9 +67,9 @@ int reverse_list1(struct node *head)
 	return 0;
 }
 
-int reverse_list2(struct node *head)
+int reverse_list2(struct Node *head)
 {
-	struct node *cur, *next;
+	struct Node *cur, *next;
 
 	if (NULL == head->next || NULL == head->next->next)
 		return 0;
@@ -86,9 +86,9 @@ int reverse_list2(struct node *head)
 	return 0;
 }
 
-int reverse_list3(struct node *head)
+int reverse_list3(struct Node *head)
 {
-	struct node *last, *tmp;
+	struct Node *last, *tmp;
 
 	if (NULL == head->next || NULL == head->next->next)
 		return 0;
@@ -107,9 +107,9 @@ int reverse_list3(struct node *head)
 
 	return 0;
 }
-struct node *create_head()
+struct Node *create_head()
 {
-	struct node *node;
+	struct Node *node;
 
 	node = malloc(sizeof(*node));
 	if (node == NULL)
@@ -121,9 +121,9 @@ struct node *create_head()
 
 }
 
-int transfer(struct node *head, handle func)
+int transfer(struct Node *head, handle func)
 {
-	struct node *cur, *next;
+	struct Node *cur, *next;
 
 	cur = head->next;
 	while (cur) {
@@ -135,14 +135,14 @@ int transfer(struct node *head, handle func)
 	return 0;
 }
 
-void show_data(struct node *node)
+void show_data(struct Node *node)
 {
 	printf("data = %d\n", node->data);
 }
 
 int main()
 {
-	struct node *head;
+	struct Node *head;
 
 	head = create_head();
 	// ...
