@@ -9,6 +9,7 @@
 #define DATA_LEN 512
 
 int send_pack(const char *, int, struct sockaddr_in *);
+int recv_pack(const char *, int, struct sockaddr_in *);
 
 int main()
 {
@@ -50,18 +51,92 @@ int main()
                 perror("Fail to send_pack\n");
                 goto send_pack_fail;
             }
+            printf("send success");
+            break;
+        case 2:
+            printf("start receive\n");
+            ret = recv_pack(filename, sd, &c_addr);
+            if (ret < 0) {
+                perror("Fail to recv_pack\n");
+                goto recv_pack_fail;
+            }
+            printf("receive success\n");
             break;
         default:
             goto send_pack_fail;
     }
 
-    printf("send success\n");
     return 0;
+
+recv_pack_fail:
 send_pack_fail:
 recvfrom_fail:
 bind_fail:
     close(sd);
 socket_fail:
+    return -1;
+}
+
+int recv_pack(const char *filename, int sd, struct sockaddr_in *c_addr)
+{
+    int ret;
+    int fd;
+    int num = 1;
+    int recv_len;
+    unsigned char recv_buff[LEN], send_buff[LEN];
+    socklen_t addrlen = sizeof(struct sockaddr_in);
+
+    fd = open(filename, O_RDWR|O_CREAT, S_IRWXG|S_IRWXU);
+    if (fd < 0) {
+        perror("Fail to open\n");
+        goto open_fail;
+    }
+
+    send_buff[0] = 0;
+    send_buff[1] = 4;
+    send_buff[2] = 0;
+    send_buff[3] = 0;
+
+    ret = sendto(sd, send_buff, 4, 0, (struct sockaddr *)c_addr, sizeof(*c_addr));
+    if (ret < 0) {
+        perror("Fail to sendto\n");
+        goto sendto_fail;
+    }
+
+    while(1) {
+        recv_len = recvfrom(sd, recv_buff, LEN, 0, (struct sockaddr *)c_addr, &addrlen);
+        if (recv_len < 0) {
+            perror("Fail to recvfrom\n");
+            goto recvfrom_fail;
+        }
+        printf("recv_num = %d\n", recv_buff[3]);
+
+        send_buff[2] = recv_buff[2];
+        send_buff[3] = recv_buff[3];
+
+        ret = sendto(sd, send_buff, 4, 0, (struct sockaddr *)c_addr, sizeof(*c_addr));
+        if (ret < 0) {
+            perror("Fail to sendto\n");
+            goto sendto_fail;
+        }
+        ret = write(fd, recv_buff + 4, recv_len - 4);
+        if (ret < 0) {
+            perror("Fail to write\n");
+            goto write_fail;
+        } else if (ret < DATA_LEN) {
+            goto success;
+        }
+    }
+
+success:
+    close(fd);
+    return 0;
+
+write_fail:
+    recvfrom_fail:
+sendto_fail:
+    close(fd);
+open_fail:
     return -1;
 }
 
